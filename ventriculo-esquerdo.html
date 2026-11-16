@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mórula | Laboratório do ventrículo esquerdo</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#153753;background:#eef6fc;--navy:#10385c;--blue:#086ba9;--line:#c9dfea;--muted:#47647a;--purple:#6843a4}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top left,#dbefff,transparent 65%)}
+main{max-width:1160px;margin:auto;padding:clamp(14px,4vw,44px)}
+header{background:linear-gradient(118deg,#102f50,#0c527e);color:#fff;border-radius:24px;padding:clamp(20px,4vw,38px);margin-bottom:18px}
+.brand{font-size:.85rem;font-weight:800;letter-spacing:.13em;color:#bbdef6}
+h1{font-size:clamp(1.66rem,4vw,2.75rem);line-height:1.08;margin:.3em 0} h2{font-size:1.28rem;margin:0 0 8px}p{margin:.45em 0;line-height:1.5}
+header p{color:#deeffc}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
+button{font:inherit;font-weight:700;min-height:44px;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:9px 13px;background:#fff;color:var(--navy);touch-action:manipulation}
+button:focus-visible,select:focus-visible,h2:focus-visible{outline:3px solid #985716;outline-offset:2px}
+nav button[aria-current="step"],button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+nav button:disabled{background:#e6eef4;color:#576e81;cursor:default}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:clamp(12px,2vw,22px);min-width:0}
+figure{margin:0}.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.87rem}
+.key{display:inline-block;width:22px;border-top:3px dashed #516980;margin-right:6px;vertical-align:middle}
+.key.changed{border-top:3px solid var(--purple)}
+svg{display:block;width:100%;height:auto;margin:8px 0;color:var(--navy);font:13px system-ui,sans-serif}
+.caption{color:var(--muted);font-size:.84rem}
+table{border-collapse:collapse;width:100%;font-size:.87rem;margin-top:10px}
+th,td{padding:8px 4px;text-align:center;border-bottom:1px solid #e0ebf2}th:first-child{text-align:left}
+fieldset{padding:0;border:0;margin:0}legend{padding:0;font-weight:700;margin:0 0 10px}
+label{display:block;margin:0 0 10px;font-weight:650;font-size:.93rem}
+select{display:block;width:100%;height:auto;min-height:44px;margin-top:4px;padding:8px;font:inherit;background:#f5faff;color:#153753;border:1px solid #abc8dc;border-radius:10px}
+form{margin-top:15px}.feedback{background:#e9f6ff;border-radius:12px;padding:12px;margin:14px 0}.feedback.correct{background:#e6f6ec;color:#15533b}.feedback.retry{background:#fff0de;color:#6b3906}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+[hidden]{display:none!important}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.panel{border-radius:16px}nav{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="brand">MÓRULA · FISIOLOGIA CARDIOVASCULAR</div>
+<h1>Laboratório do ventrículo esquerdo</h1>
+<p>Preveja como a pré-carga, a pós-carga e a contratilidade mudam a alça pressão–volume.</p>
+</header>
+<nav id="steps" aria-label="Cenários do laboratório"></nav>
+<div class="layout">
+<figure class="panel">
+<h2>Alça pressão–volume</h2>
+<div class="legend"><span><i class="key"></i>Referência</span><span id="changedKey" hidden><i class="key changed"></i><span id="changedLabel"></span></span></div>
+<svg id="chart" viewBox="0 0 512 350" role="img" aria-labelledby="chartTitle chartDesc">
+<title id="chartTitle">Alça pressão–volume do ventrículo esquerdo</title>
+<desc id="chartDesc"></desc>
+<defs>
+<marker id="arrowStart" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M10 0 0 5 10 10" fill="none" stroke="context-stroke" stroke-width="2"/></marker>
+<marker id="arrowEnd" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10" fill="none" stroke="context-stroke" stroke-width="2"/></marker>
+</defs>
+<g id="axes"></g><g id="curves"></g>
+</svg>
+<figcaption class="caption">Valores ilustrativos. A seta horizontal indica o volume ejetado (VE = VDF − VSF).</figcaption>
+<table aria-label="Volumes do ventrículo esquerdo">
+<thead><tr><th scope="col">Volume</th><th scope="col">Referência</th><th scope="col" id="comparisonHead" hidden>Alterado</th></tr></thead>
+<tbody id="metrics"></tbody>
+</table>
+</figure>
+<section class="panel" aria-labelledby="scenarioTitle">
+<h2 id="scenarioTitle" tabindex="-1"></h2>
+<p id="scenarioText"></p>
+<form id="prediction">
+<fieldset id="fields"></fieldset>
+<button class="primary" type="submit" id="verify"></button>
+</form>
+<div id="feedback" role="status" aria-live="polite" class="feedback" hidden></div>
+<div class="actions">
+<button class="primary" id="next" hidden>Próximo cenário →</button>
+<button id="reset" hidden>Refazer laboratório</button>
+</div>
+</section>
+</div>
+</main>
+<script>
+const reference = { vdf:120, vsf:50, opening:80, end:95, peak:122 };
+const volumes = [
+  ['vdf','Volume diastólico final (VDF)'],
+  ['vsf','Volume sistólico final (VSF)'],
+  ['ve','Volume ejetado (VE)']
+];
+const directions = [['up','Aumenta'],['same','Fica igual'],['down','Diminui']];
+const scenarios = [
+  {
+    tab:'Pós-carga', title:'Aumento agudo da pós-carga',
+    prompt:'A pressão aórtica sobe de repente. No primeiro batimento, considere o enchimento e a contratilidade iguais aos da referência. Preveja o que acontece com os volumes.',
+    loop:{vdf:120,vsf:69,opening:112,end:140,peak:155},
+    explanation:'O ventrículo precisa gerar mais pressão para abrir a valva aórtica. Com o mesmo volume inicial, sobra mais sangue no fim da sístole e a alça fica mais estreita.'
+  },
+  {
+    tab:'Pré-carga', title:'Aumento isolado da pré-carga',
+    prompt:'O ventrículo recebe mais sangue antes de contrair. Considere a pós-carga e a contratilidade constantes. Preveja o que acontece com os volumes.',
+    loop:{vdf:145,vsf:50,opening:80,end:95,peak:130},
+    explanation:'O ventrículo começa mais cheio. Neste modelo simplificado do mecanismo de Frank–Starling, o volume sistólico final permanece igual e a alça fica mais larga.'
+  },
+  {
+    tab:'Contratilidade', title:'Aumento isolado da contratilidade',
+    prompt:'O ventrículo passa a contrair com maior contratilidade, com o mesmo enchimento e a mesma pós-carga. Preveja o que acontece com os volumes.',
+    loop:{vdf:120,vsf:35,opening:80,end:96,peak:134},
+    explanation:'A contração mais vigorosa permite ejetar mais sangue com o mesmo volume inicial. Sobra menos sangue no ventrículo e a alça fica mais larga.'
+  },
+  {
+    tab:'Desafio final', title:'Qual variável mudou?',
+    prompt:'Compare as duas alças. O volume inicial e a pressão de abertura da valva aórtica são iguais. Identifique a variável que mudou e a pista que sustenta a sua resposta.',
+    loop:{vdf:120,vsf:73,opening:80,end:83,peak:99},
+    questions:[
+      ['Variável que mudou',[['pre','A pré-carga diminuiu'],['pos','A pós-carga aumentou'],['inotropia','A contratilidade diminuiu']],'inotropia'],
+      ['Pista no gráfico',[['vdf','O volume diastólico final diminuiu'],['p','A pressão de abertura da valva aórtica aumentou'],['vsf','O volume sistólico final aumentou com a mesma pressão de abertura']],'vsf']
+    ],
+    explanation:'Com o mesmo VDF e a mesma pressão de abertura aórtica, a alça mostra maior VSF e menor pressão máxima. Nesse modelo, a queda de contratilidade explica por que o ventrículo ejeta menos sangue.'
+  }
+];
+const $ = id => document.getElementById(id);
+const state = scenarios.map(() => ({answers:[], checked:false, correct:false}));
+let active = 0;
+const finalIndex = scenarios.length - 1;
+const x = volume => 67 + (volume - 20) * 2.74;
+const y = pressure => 252 - pressure * 1.28;
+const point = (volume,pressure) => [x(volume),y(pressure)].join(' ');
+const volumeAt = (loop,key) => key === 've' ? loop.vdf - loop.vsf : loop[key];
+
+function drawAxes(){
+  const verticals = [20,40,60,80,100,120,140,160].map(v =>
+    `<path d="M${x(v)} 34 V252"/><text x="${x(v)}" y="271" text-anchor="middle">${v}</text>`);
+  const horizontals = [0,40,80,120,160].map(p =>
+    `<path d="M67 ${y(p)} H466"/><text x="57" y="${y(p)+4}" text-anchor="end">${p}</text>`);
+  $('axes').innerHTML = verticals.join('') + horizontals.join('') +
+    '<path class="axis" d="M67 33 V252 H466"/><text x="67" y="23">Pressão (mmHg)</text><text x="466" y="342" text-anchor="end">Volume (mL)</text>';
+}
+function drawLoop(loop,changed){
+  const {vdf,vsf,opening,end,peak} = loop;
+  const width = vdf-vsf;
+  const fillingEnd = 10 + (vdf-reference.vdf)*.13;
+  const bottomVolume = vsf + width*.46;
+  const topVolume = vsf + width*.42;
+  const color = changed ? '#6843a4' : '#516980';
+  const measureY = changed ? 322 : 295;
+  const path = `M${point(vsf,4)} Q${point(bottomVolume,4)} ${point(vdf,fillingEnd)}
+    L${point(vdf,opening)} C${point(vdf-width*.13,peak-8)} ${point(topVolume,peak+12)}
+    ${point(vsf,end)} Z`;
+  return `<g fill="none" stroke="${color}" stroke-width="3">
+    <path d="${path}" ${changed ? '' : 'stroke-dasharray="7 5"'}/>
+    <path d="M${x(vsf)} ${measureY} H${x(vdf)}" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)" stroke-width="1.7"/>
+    </g><text x="${x((vdf+vsf)/2)}" y="${measureY-6}" text-anchor="middle" fill="${color}" font-weight="700">VE = ${width} mL</text>`;
+}
+function showChart(altered,mystery){
+  $('changedKey').hidden = !altered;
+  $('changedLabel').textContent = mystery ? 'Alça do desafio' : 'Após a alteração';
+  $('comparisonHead').hidden = !altered;
+  $('curves').innerHTML = drawLoop(reference,false) + (altered ? drawLoop(altered,true) : '');
+  $('chartDesc').textContent = 'Curva de referência tracejada em azul-cinza.' +
+    (altered ? ' Curva alterada em roxo. A largura de cada alça indica o volume ejetado.' : '');
+  $('metrics').innerHTML = volumes.map(([key,label]) =>
+    `<tr><th scope="row">${label}</th><td>${volumeAt(reference,key)} mL</td>${altered ? `<td>${volumeAt(altered,key)} mL</td>` : ''}</tr>`).join('');
+}
+function questionsFor(scenario){
+  if(scenario.questions) return scenario.questions;
+  return volumes.map(([key,label])=>{
+    const difference = volumeAt(scenario.loop,key)-volumeAt(reference,key);
+    const answer = difference > 0 ? 'up' : difference < 0 ? 'down' : 'same';
+    return [label,directions,answer];
+  });
+}
+function update(){
+  const scenario = scenarios[active];
+  const progress = state[active];
+  $('steps').replaceChildren(...scenarios.map((item,index)=>{
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = (state[index].correct ? '✓ ' : '') + item.tab;
+    button.disabled = index > 0 && !state[index-1].correct;
+    if(index === active) button.setAttribute('aria-current','step');
+    button.onclick = () => { active=index; update(); $('scenarioTitle').focus(); };
+    return button;
+  }));
+  $('scenarioTitle').textContent = scenario.title;
+  $('scenarioText').textContent = scenario.prompt;
+  const mystery = active === finalIndex;
+  $('fields').innerHTML = `<legend>${mystery ? 'Interprete as alças' : 'Faça sua previsão'}</legend>` +
+    questionsFor(scenario).map(([label,options],index) =>
+      `<label>${label}<select required name="answer${index}" ${progress.correct ? 'disabled' : ''}>
+      <option value="">Selecione</option>${options.map(([value,text]) =>
+        `<option value="${value}" ${value === progress.answers[index] ? 'selected' : ''}>${text}</option>`).join('')}</select></label>`).join('');
+  $('verify').textContent = mystery ? 'Conferir interpretação' : progress.checked ? 'Conferir nova previsão' : 'Conferir e revelar a alça';
+  $('verify').hidden = progress.correct;
+  $('next').hidden = !progress.correct || mystery;
+  $('reset').hidden = !state[finalIndex].correct;
+  const feedback = $('feedback');
+  feedback.hidden = !progress.checked;
+  feedback.className = 'feedback ' + (progress.correct ? 'correct' : 'retry');
+  if(progress.checked){
+    const mistakes = questionsFor(scenario).filter((question,index)=>question[2]!==progress.answers[index]).map(question=>question[0]);
+    feedback.textContent = progress.correct
+      ? (mystery ? 'Laboratório concluído! ' : 'Correto! ') + scenario.explanation
+      : 'Revise ' + mistakes.join(' e ') + '. Compare as alças e tente de novo. ' + scenario.explanation;
+  } else feedback.textContent = '';
+  showChart(progress.checked || mystery ? scenario.loop : null,mystery);
+}
+$('prediction').addEventListener('change',event=>{
+  const index = Number(event.target.name.replace('answer',''));
+  state[active].answers[index] = event.target.value;
+});
+$('prediction').addEventListener('submit',event=>{
+  event.preventDefault();
+  const progress = state[active];
+  const data = new FormData(event.currentTarget);
+  const questions = questionsFor(scenarios[active]);
+  progress.answers = questions.map((_,index)=>data.get('answer'+index));
+  progress.checked = true;
+  progress.correct = questions.every((question,index)=>question[2]===progress.answers[index]);
+  update();
+  if(progress.correct) (active===finalIndex ? $('reset') : $('next')).focus();
+  else $('verify').focus();
+});
+$('next').onclick = ()=>{active++;update();$('scenarioTitle').focus();};
+$('reset').onclick = ()=>{
+  state.forEach(progress=>Object.assign(progress,{answers:[],checked:false,correct:false}));
+  active=0;update();$('scenarioTitle').focus();
+};
+drawAxes();
+update();
+</script>
+<style>
+#axes > path{stroke:#dfeaf2;fill:none}#axes > path.axis{stroke:#5a778d;stroke-width:1.5}#axes text{fill:#43647c}
+</style>
+</body>
+</html>
